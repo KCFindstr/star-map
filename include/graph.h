@@ -1,5 +1,7 @@
 #pragma once
+#include "node.h"
 #include "node_ref.h"
+#include <array>
 #include <vector>
 
 namespace star_map {
@@ -17,7 +19,15 @@ public:
 
   size_t Size() const { return nodes_.size(); }
 
-  NodeRef AddNode();
+  NodeRef Node();
+  template <size_t N> std::array<NodeRef, N> Nodes() {
+    std::array<NodeRef, N> result;
+    for (auto &node : result) {
+      node = Node();
+    }
+    return std::move(result);
+  }
+  std::vector<NodeRef> Nodes(int count);
 
   bool HasPath(size_t from, size_t to) const;
   bool HasPath(const NodeRef &from, const NodeRef &to) const {
@@ -40,7 +50,7 @@ public:
   }
 
 private:
-  std::vector<Node *> nodes_;
+  std::vector<star_map::Node *> nodes_;
 
   void Clear();
 };

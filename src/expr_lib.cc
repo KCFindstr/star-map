@@ -1,10 +1,21 @@
 #include "expr_lib.h"
+#include "common.h"
 #include "graph.h"
 #include "node_ref.h"
+#include <iostream>
 
 namespace star_map {
 
+ChainExpr::ChainExpr(ChainExpr &&other)
+    : chain_(std::move(other.chain_)), right_(other.right_),
+      evaluated_(other.evaluated_), graph_(other.graph_) {
+  LOG << "Addr: " << this << ", Moved from " << &other << ", E=" << evaluated_
+      << std::endl;
+  other.evaluated_ = true;
+}
+
 ChainExpr::~ChainExpr() {
+  LOG << "Addr: " << this << ", ~ChainExpr() E=" << evaluated_ << std::endl;
   if (!evaluated_) {
     evaluated_ = true;
     Execute();
@@ -12,40 +23,46 @@ ChainExpr::~ChainExpr() {
 }
 
 ChainExpr::operator bool() {
-  evaluated_ = true;
-  return Check();
+  LOG << "Addr: " << this << ", ChainExpr::operator bool()" << std::endl;
+  if (!evaluated_) {
+    evaluated_ = true;
+    return Check();
+  }
+  return false;
 }
 
-ChainExpr &ChainExpr::operator<=>(const NodeRef &other) {
+ChainExpr ChainExpr::operator<=>(const NodeRef &other) {
   chain_.push_back(std::make_pair(right_, ChainType::Bi));
   right_ = other.Id();
-  return *this;
+  return std::move(*this);
 }
 
-ChainExpr &ChainExpr::operator>(const NodeRef &other) {
+ChainExpr ChainExpr::operator>(const NodeRef &other) {
   chain_.push_back(std::make_pair(right_, ChainType::LTR));
   right_ = other.Id();
-  return *this;
+  return std::move(*this);
 }
 
-ChainExpr &ChainExpr::operator>(const ChainExpr &other) {
+ChainExpr ChainExpr::operator>(ChainExpr &&other) {
   chain_.push_back(std::make_pair(right_, ChainType::LTR));
   right_ = other.right_;
   chain_.insert(chain_.end(), other.chain_.begin(), other.chain_.end());
-  return *this;
+  other.evaluated_ = true;
+  return std::move(*this);
 }
 
-ChainExpr &ChainExpr::operator<(const NodeRef &other) {
+ChainExpr ChainExpr::operator<(const NodeRef &other) {
   chain_.push_back(std::make_pair(right_, ChainType::RTL));
   right_ = other.Id();
-  return *this;
+  return std::move(*this);
 }
 
-ChainExpr &ChainExpr::operator<(const ChainExpr &other) {
+ChainExpr ChainExpr::operator<(ChainExpr &&other) {
   chain_.push_back(std::make_pair(right_, ChainType::RTL));
   right_ = other.right_;
   chain_.insert(chain_.end(), other.chain_.begin(), other.chain_.end());
-  return *this;
+  other.evaluated_ = true;
+  return std::move(*this);
 }
 
 void ChainExpr::Execute() {
@@ -54,13 +71,16 @@ void ChainExpr::Execute() {
     size_t r = i + 1 < chain_.size() ? chain_[i + 1].first : right_;
     switch (chain_[i].second) {
     case ChainType::Bi:
+      LOG << "Execute Bi: " << l << " <=> " << r << std::endl;
       graph_->AddEdge(l, r);
       graph_->AddEdge(r, l);
       break;
     case ChainType::LTR:
+      LOG << "Execute LTR: " << l << " > " << r << std::endl;
       graph_->AddEdge(l, r);
       break;
     case ChainType::RTL:
+      LOG << "Execute RTL: " << l << " < " << r << std::endl;
       graph_->AddEdge(r, l);
       break;
     default:
@@ -93,10 +113,10 @@ bool ChainExpr::Check() const {
   return true;
 }
 
-ChainExpr::ChainExpr(const NodeRef &left, const NodeRef &right,
-                     ChainType chainType)
-    : chain_(), right_(right.Id()), evaluated_(false), graph_(right.Graph()) {
-  chain_.push_back(std::make_pair(left.Id(), chainType));
+ChainExpr::ChainExpr(const NodeRef &node)
+    : chain_(), right_(node.Id()), evaluated_(false), graph_(node.Graph()) {
+  LOG << "Addr: " << this << ", ChainExpr::ChainExpr(const NodeRef &node)"
+      << std::endl;
 }
 
 PathCheckExpr::operator bool() const {

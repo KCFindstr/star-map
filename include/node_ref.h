@@ -12,11 +12,14 @@ public:
 
   ChainExpr operator<=>(const NodeRef &other) const;
   ChainExpr operator>(const NodeRef &other) const;
+  ChainExpr operator>(ChainExpr &&other) const;
   ChainExpr operator<(const NodeRef &other) const;
+  ChainExpr operator<(ChainExpr &&other) const;
   PathCheckExpr operator>>(const NodeRef &other) const;
   PathCheckExpr operator<<(const NodeRef &other) const;
   bool operator==(const NodeRef &other) const;
 
+  NodeRef() = default;
   NodeRef(const NodeRef &) = default;
   NodeRef &operator=(const NodeRef &) = default;
   NodeRef(NodeRef &&) = default;

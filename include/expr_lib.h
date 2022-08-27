@@ -14,19 +14,19 @@ public:
   ChainExpr() = delete;
   ChainExpr(const ChainExpr &) = delete;
   ChainExpr &operator=(const ChainExpr &) = delete;
-  ChainExpr(ChainExpr &&) = delete;
+  ChainExpr(ChainExpr &&);
   ChainExpr &operator=(ChainExpr &&) = delete;
   ~ChainExpr();
   operator bool();
 
-  ChainExpr &operator<=>(const NodeRef &other);
-  ChainExpr &operator>(const NodeRef &other);
-  ChainExpr &operator>(const ChainExpr &other);
-  ChainExpr &operator<(const NodeRef &other);
-  ChainExpr &operator<(const ChainExpr &other);
+  ChainExpr operator<=>(const NodeRef &other);
+  ChainExpr operator>(const NodeRef &other);
+  ChainExpr operator>(ChainExpr &&other);
+  ChainExpr operator<(const NodeRef &other);
+  ChainExpr operator<(ChainExpr &&other);
 
 protected:
-  ChainExpr(const NodeRef &left, const NodeRef &right, ChainType chainType);
+  ChainExpr(const NodeRef &node);
 
   virtual void Execute();
   virtual bool Check() const;

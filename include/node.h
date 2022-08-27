@@ -14,7 +14,7 @@ private:
   Node &operator=(Node &&) = delete;
   ~Node() = default;
 
-  std::unordered_set<size_t> neighbors_;
+  std::unordered_set<size_t> outgoing_;
 
   friend class Graph;
 };

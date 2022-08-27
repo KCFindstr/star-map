@@ -4,15 +4,23 @@
 namespace star_map {
 
 ChainExpr NodeRef::operator<=>(const NodeRef &other) const {
-  return ChainExpr(*this, other, ChainType::Bi);
+  return ChainExpr(*this) <=> other;
 }
 
 ChainExpr NodeRef::operator>(const NodeRef &other) const {
-  return ChainExpr(*this, other, ChainType::LTR);
+  return ChainExpr(*this) > other;
+}
+
+ChainExpr NodeRef::operator>(ChainExpr &&other) const {
+  return ChainExpr(*this) > std::move(other);
 }
 
 ChainExpr NodeRef::operator<(const NodeRef &other) const {
-  return ChainExpr(*this, other, ChainType::RTL);
+  return ChainExpr(*this) < other;
+}
+
+ChainExpr NodeRef::operator<(ChainExpr &&other) const {
+  return ChainExpr(*this) < std::move(other);
 }
 
 PathCheckExpr NodeRef::operator>>(const NodeRef &other) const {

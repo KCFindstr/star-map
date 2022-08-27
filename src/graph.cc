@@ -3,6 +3,7 @@
 #include <queue>
 
 using NodeQueue = std::queue<size_t>;
+using TNode = star_map::Node;
 
 namespace star_map {
 
@@ -12,7 +13,7 @@ Graph &Graph::operator=(const Graph &graph) {
   if (this != &graph) {
     Clear();
     for (auto node : graph.nodes_) {
-      nodes_.push_back(new Node(*node));
+      nodes_.push_back(new TNode(*node));
     }
   }
   return *this;
@@ -20,9 +21,18 @@ Graph &Graph::operator=(const Graph &graph) {
 
 Graph::~Graph() { Clear(); }
 
-NodeRef Graph::AddNode() {
-  nodes_.push_back(new Node);
+NodeRef Graph::Node() {
+  nodes_.push_back(new TNode);
   return NodeRef(this, nodes_.size() - 1);
+}
+
+std::vector<NodeRef> Graph::Nodes(int count) {
+  std::vector<NodeRef> result;
+  result.reserve(count);
+  for (int i = 0; i < count; ++i) {
+    result.push_back(Node());
+  }
+  return std::move(result);
 }
 
 bool Graph::HasPath(size_t from, size_t to) const {
@@ -39,7 +49,7 @@ bool Graph::HasPath(size_t from, size_t to) const {
   while (!queue.empty()) {
     size_t node = queue.front();
     queue.pop();
-    for (auto neighbor : nodes_[node]->neighbors_) {
+    for (auto neighbor : nodes_[node]->outgoing_) {
       if (neighbor == to) {
         return true;
       }
@@ -56,7 +66,7 @@ bool Graph::HasEdge(size_t from, size_t to) const {
   if (from >= nodes_.size() || to >= nodes_.size()) {
     return false;
   }
-  return nodes_[from]->neighbors_.find(to) != nodes_[from]->neighbors_.end();
+  return nodes_[from]->outgoing_.find(to) != nodes_[from]->outgoing_.end();
 }
 
 bool Graph::AddEdge(size_t from, size_t to) {
@@ -66,7 +76,7 @@ bool Graph::AddEdge(size_t from, size_t to) {
   if (HasEdge(from, to)) {
     return false;
   }
-  nodes_[from]->neighbors_.insert(to);
+  nodes_[from]->outgoing_.insert(to);
   return true;
 }
 
@@ -77,7 +87,7 @@ bool Graph::RemoveEdge(size_t from, size_t to) {
   if (!HasEdge(from, to)) {
     return false;
   }
-  nodes_[from]->neighbors_.erase(to);
+  nodes_[from]->outgoing_.erase(to);
   return true;
 }
 
