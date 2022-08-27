@@ -7,14 +7,25 @@ using TNode = star_map::Node;
 
 namespace star_map {
 
-Graph::Graph(const Graph &graph) { *this = graph; }
+Graph::Graph(const Graph &other) { *this = other; }
 
-Graph &Graph::operator=(const Graph &graph) {
-  if (this != &graph) {
+Graph &Graph::operator=(const Graph &other) {
+  if (this != &other) {
     Clear();
-    for (auto node : graph.nodes_) {
+    for (auto node : other.nodes_) {
       nodes_.push_back(new TNode(*node));
     }
+  }
+  return *this;
+}
+
+Graph::Graph(Graph &&other) { *this = std::move(other); }
+
+Graph &Graph::operator=(Graph &&other) {
+  if (this != &other) {
+    Clear();
+    nodes_ = std::move(other.nodes_);
+    other.nodes_.clear();
   }
   return *this;
 }

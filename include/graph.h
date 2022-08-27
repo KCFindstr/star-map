@@ -13,8 +13,8 @@ public:
   Graph() = default;
   Graph(const Graph &);
   Graph &operator=(const Graph &);
-  Graph(Graph &&) = default;
-  Graph &operator=(Graph &&) = default;
+  Graph(Graph &&);
+  Graph &operator=(Graph &&);
   ~Graph();
 
   size_t Size() const { return nodes_.size(); }
