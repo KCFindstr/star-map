@@ -12,9 +12,9 @@ TEST(GraphTest, ExampleTest) {
   Graph graph;
   // Create 5 nodes
   auto [A, B, C, D, E] = graph.Nodes<5>();
-  // Creates a chain of nodes A -> B -> C
+  // Create a chain of nodes A -> B -> C
   A > B > C;
-  // Creates a bidirectional chain of nodes B <-> D <-> E
+  // Create a bidirectional chain of nodes B <-> D <-> E
   B <=> D <=> E;
   // Assert there is an edge from A to B
   SM_ASSERT_TRUE(A > B);
