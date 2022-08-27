@@ -43,7 +43,7 @@ std::vector<NodeRef> Graph::Nodes(int count) {
   for (int i = 0; i < count; ++i) {
     result.push_back(Node());
   }
-  return std::move(result);
+  return result;
 }
 
 bool Graph::HasPath(size_t from, size_t to) const {

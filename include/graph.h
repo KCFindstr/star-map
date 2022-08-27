@@ -25,7 +25,7 @@ public:
     for (auto &node : result) {
       node = Node();
     }
-    return std::move(result);
+    return result;
   }
   std::vector<NodeRef> Nodes(int count);
 
