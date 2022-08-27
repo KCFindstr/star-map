@@ -8,14 +8,16 @@ namespace star_map {
 
 ChainExpr::ChainExpr(ChainExpr &&other)
     : chain_(std::move(other.chain_)), right_(other.right_),
-      evaluated_(other.evaluated_), graph_(other.graph_) {
-  LOG << "Addr: " << this << ", Moved from " << &other << ", E=" << evaluated_
-      << std::endl;
+      evaluated_(other.evaluated_), negated_(other.negated_),
+      graph_(other.graph_) {
+  LOG << "Addr: " << this << ",  ChainExpr::Moved from " << &other
+      << ", E=" << evaluated_ << std::endl;
   other.evaluated_ = true;
 }
 
 ChainExpr::~ChainExpr() {
-  LOG << "Addr: " << this << ", ~ChainExpr() E=" << evaluated_ << std::endl;
+  LOG << "Addr: " << this << ", ChainExpr::~ChainExpr() E=" << evaluated_
+      << ", N=" << negated_ << std::endl;
   if (!evaluated_) {
     evaluated_ = true;
     Execute();
@@ -26,7 +28,7 @@ ChainExpr::operator bool() {
   LOG << "Addr: " << this << ", ChainExpr::operator bool()" << std::endl;
   if (!evaluated_) {
     evaluated_ = true;
-    return Check();
+    return Check() ^ negated_;
   }
   return false;
 }
@@ -65,6 +67,12 @@ ChainExpr ChainExpr::operator<(ChainExpr &&other) {
   return std::move(*this);
 }
 
+ChainExpr ChainExpr::operator!() {
+  LOG << "Addr: " << this << ", ChainExpr::operator!()" << std::endl;
+  negated_ = !negated_;
+  return std::move(*this);
+}
+
 void ChainExpr::Execute() {
   for (size_t i = 0; i < chain_.size(); ++i) {
     size_t l = chain_[i].first;
@@ -72,16 +80,29 @@ void ChainExpr::Execute() {
     switch (chain_[i].second) {
     case ChainType::Bi:
       LOG << "Execute Bi: " << l << " <=> " << r << std::endl;
-      graph_->AddEdge(l, r);
-      graph_->AddEdge(r, l);
+      if (negated_) {
+        graph_->RemoveEdge(l, r);
+        graph_->RemoveEdge(r, l);
+      } else {
+        graph_->AddEdge(l, r);
+        graph_->AddEdge(r, l);
+      }
       break;
     case ChainType::LTR:
       LOG << "Execute LTR: " << l << " > " << r << std::endl;
-      graph_->AddEdge(l, r);
+      if (negated_) {
+        graph_->RemoveEdge(l, r);
+      } else {
+        graph_->AddEdge(l, r);
+      }
       break;
     case ChainType::RTL:
       LOG << "Execute RTL: " << l << " < " << r << std::endl;
-      graph_->AddEdge(r, l);
+      if (negated_) {
+        graph_->RemoveEdge(r, l);
+      } else {
+        graph_->AddEdge(r, l);
+      }
       break;
     default:
       break;
@@ -114,7 +135,8 @@ bool ChainExpr::Check() const {
 }
 
 ChainExpr::ChainExpr(const NodeRef &node)
-    : chain_(), right_(node.Id()), evaluated_(false), graph_(node.Graph()) {
+    : chain_(), right_(node.Id()), evaluated_(false), negated_(false),
+      graph_(node.Graph()) {
   LOG << "Addr: " << this << ", ChainExpr::ChainExpr(const NodeRef &node)"
       << std::endl;
 }

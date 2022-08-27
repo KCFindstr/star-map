@@ -48,9 +48,9 @@ gtest_discover_tests(star_map_test)
 
 # Set compiler flags
 if(MSVC)
-  target_compile_options(star_map_lib PRIVATE /std:c++20 /W3)
+  target_compile_options(star_map_lib PRIVATE /std:c++20 /W3 /D_STAR_MAP_DEBUG)
   target_compile_options(star_map_test PRIVATE /std:c++20 /W3)
 else()
-  target_compile_options(star_map_lib PRIVATE -std=c++20 -Wall -Wextra -pedantic)
-  target_compile_options(star_map_test PRIVATE -std=c++20 -Wall -Wextra -pedantic)
+  target_compile_options(star_map_lib PRIVATE -std=c++2a -Wall -Wextra -pedantic -D_STAR_MAP_DEBUG)
+  target_compile_options(star_map_test PRIVATE -std=c++2a -Wall -Wextra -pedantic)
 endif()

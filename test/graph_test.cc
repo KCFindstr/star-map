@@ -8,6 +8,41 @@ namespace star_map {
 #define SM_ASSERT_TRUE(expr) ASSERT_TRUE(bool(expr))
 #define SM_ASSERT_FALSE(expr) ASSERT_FALSE(bool(expr))
 
+TEST(GraphTest, ExampleTest) {
+  // Create a graph
+  Graph graph;
+  // Create 5 nodes
+  auto [A, B, C, D, E] = graph.Nodes<5>();
+  // Creates a chain of nodes A -> B -> C
+  A > B > C;
+  // Creates a bidirectional chain of nodes B <-> D <-> E
+  B <=> D <=> E;
+  // Assert there is an edge from A to B
+  SM_ASSERT_TRUE(A > B);
+  // Assert there is no edge from B to A
+  SM_ASSERT_FALSE(A < B);
+  // Assert there is a bidirectional edge between D and B
+  SM_ASSERT_TRUE(D <=> B);
+  // Assert there is no bidirectional edge between A and B
+  SM_ASSERT_FALSE(A <=> B);
+  // Assert there is a path from A to E (A -> B -> D -> E)
+  SM_ASSERT_TRUE(A >> E);
+  // Assert there is no path from E to A
+  SM_ASSERT_FALSE(E >> A);
+  // Assert there is a path from E to C (E -> D -> B -> C)
+  SM_ASSERT_TRUE(C << E);
+  // Remove the edge D -> E
+  !(D > E);
+  // Assert there is no path from A to E
+  SM_ASSERT_FALSE(A >> E);
+  // Assert there is a path from E to C
+  SM_ASSERT_TRUE(C << E);
+  // Add the edge D -> E back
+  D > E;
+  // Assert there is a path from A to E
+  SM_ASSERT_TRUE(A >> E);
+}
+
 TEST(GraphTest, PathChain) {
   Graph graph;
   auto A = graph.Node();
@@ -107,7 +142,7 @@ TEST(GraphTest, ChainCheck) {
 
 TEST(GraphTest, TreeCheck) {
   Graph graph;
-  int N = 128;
+  int N = 16;
   auto nodes = graph.Nodes(N);
   for (int i = 1; i < N; ++i) {
     nodes[i] < nodes[i >> 1];
@@ -121,7 +156,7 @@ TEST(GraphTest, TreeCheck) {
 
 TEST(GraphTest, LoopCheck) {
   Graph graph;
-  int N = 128;
+  int N = 16;
   auto nodes = graph.Nodes(N);
   for (int i = 0; i < N; ++i) {
     nodes[i] > nodes[(i + 1) % N];
@@ -131,6 +166,27 @@ TEST(GraphTest, LoopCheck) {
       SM_ASSERT_TRUE(nodes[i] >> nodes[j]) << i << " cannot reach " << j;
     }
   }
+}
+
+TEST(GraphTest, Negate) {
+  Graph graph;
+  auto [A, B, C, D] = graph.Nodes<4>();
+  A <=> B > C > D;
+  SM_ASSERT_TRUE(A >> D);
+  SM_ASSERT_TRUE(A <=> B);
+  SM_ASSERT_FALSE(!(A > B > C));
+  SM_ASSERT_TRUE(!(A > B > C > A));
+  // Remove edge
+  !(A > B > C > D);
+  SM_ASSERT_FALSE(A >> D);
+  SM_ASSERT_FALSE(A <=> B);
+  SM_ASSERT_FALSE(A > B);
+  SM_ASSERT_FALSE(B > C);
+  SM_ASSERT_FALSE(C > D);
+  SM_ASSERT_TRUE(B > A);
+  // Add back
+  A > B;
+  SM_ASSERT_TRUE(A <=> B);
 }
 
 } // namespace star_map

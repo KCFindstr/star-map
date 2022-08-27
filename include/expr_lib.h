@@ -24,6 +24,7 @@ public:
   ChainExpr operator>(ChainExpr &&other);
   ChainExpr operator<(const NodeRef &other);
   ChainExpr operator<(ChainExpr &&other);
+  ChainExpr operator!();
 
 protected:
   ChainExpr(const NodeRef &node);
@@ -34,6 +35,7 @@ protected:
   std::vector<std::pair<int, ChainType>> chain_;
   size_t right_;
   bool evaluated_;
+  bool negated_;
   Graph *graph_;
 
   friend class NodeRef;
