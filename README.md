@@ -1,5 +1,7 @@
 # star-map
 
+![test](https://github.com/KCFindstr/star-map/actions/workflows/test.yml/badge.svg)
+
 Fun C++ graph library utilizing C++20 spaceship operator.
 
 ## Usage
